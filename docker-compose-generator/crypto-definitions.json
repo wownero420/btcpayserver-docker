@@ -77,6 +77,13 @@
     "EclairFragment": null
   },
   {
+    "Crypto": "wow",
+    "CryptoFragment": "wownero",
+    "CLightningFragment": null,
+    "LNDFragment": null,
+    "EclairFragment": null
+  },
+  {
     "Crypto": "lbtc",
     "CryptoFragment": "liquid",
     "CLightningFragment": null,

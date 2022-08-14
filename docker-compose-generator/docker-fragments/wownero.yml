@@ -1,0 +1,34 @@
+version: "3"
+
+services:
+  wownerod:
+    restart: unless-stopped
+    container_name: btcpayserver_wownerod
+    image: btcpayserver/wownero:0.18.1.0-amd64
+    entrypoint: wownerod --rpc-bind-ip=0.0.0.0 --confirm-external-bind --rpc-bind-port=18081 --non-interactive --block-notify="/bin/sh ./scripts/notifier.sh -X GET http://btcpayserver:49392/wownerolikedaemoncallback/block?cryptoCode=wow&hash=%s" --hide-my-port --prune-blockchain --enable-dns-blocklist
+    expose:
+      - "18081"
+    volumes:
+      - "wow_data:/home/wownero/.bitwownero"
+  wownerod_wallet:
+    restart: unless-stopped
+    container_name: btcpayserver_wownero_wallet
+    image: btcpayserver/wownero:0.18.1.0-amd64
+    entrypoint: wownero-wallet-rpc --rpc-bind-ip=0.0.0.0 --disable-rpc-login --confirm-external-bind --rpc-bind-port=18082 --non-interactive --trusted-daemon  --daemon-address=wownerod:18081 --wallet-file=/wallet/wallet --password-file=/wallet/password --tx-notify="/bin/sh ./scripts/notifier.sh  -X GET http://btcpayserver:49392/wownerolikedaemoncallback/tx?cryptoCode=xmr&hash=%s"
+    expose:
+      - "18082"
+    volumes:
+      - "wow_wallet:/wallet"
+    depends_on:
+      - wownerod
+  btcpayserver:
+    environment:
+      BTCPAY_CHAINS: "wow"
+      BTCPAY_WOW_DAEMON_URI: http://wownerod:18081
+      BTCPAY_WOW_WALLET_DAEMON_URI: http://wownerod_wallet:18082
+      BTCPAY_WOW_WALLET_DAEMON_WALLETDIR: /root/wow_wallet
+    volumes:
+      - "wow_wallet:/root/wow_wallet"
+volumes:
+  wow_wallet:
+  wow_data:
